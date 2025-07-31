@@ -9,11 +9,26 @@ app.post("/crop", async (req, res) => {
   try {
     const { imageUrl, bbox, output_size = [1080, 1920], zoom_factor = 2 } = req.body;
 
-    if (!imageUrl || !bbox) {
-      return res.status(400).json({ error: "Missing imageUrl or bbox" });
+    // Validate bbox format and convert to array if needed
+    let box = bbox;
+
+    // Try to fix bbox if it's not already an array
+    if (!Array.isArray(bbox)) {
+      if (typeof bbox === "string") {
+        // Try to parse if it's a string like "299,245,459,486"
+        box = bbox.split(",").map(Number);
+      } else if (typeof bbox === "object" && Object.values(bbox).length === 4) {
+        box = Object.values(bbox).map(Number);
+      } else {
+        return res.status(400).json({ error: "Invalid bbox format" });
+      }
     }
 
-    const [x1, y1, x2, y2] = bbox;
+    if (!imageUrl || box.length !== 4) {
+      return res.status(400).json({ error: "Missing or invalid imageUrl or bbox" });
+    }
+
+    const [x1, y1, x2, y2] = box;
     const cropWidth = x2 - x1;
     const cropHeight = y2 - y1;
 
@@ -38,11 +53,11 @@ app.post("/crop", async (req, res) => {
     res.send(cropped);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Processing failed" });
+    res.status(500).json({ error: "Processing failed", details: err.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("Server is running on port", PORT);
+  console.log("✅ Server is running on port", PORT);
 });
