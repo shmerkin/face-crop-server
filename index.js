@@ -37,4 +37,11 @@ app.post("/crop", async (req, res) => {
     res.send(cropped);
   } catch (err) {
     console.error(err);
-    res.status(5
+    res.status(500).json({ error: "Processing failed" });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Server is running on port", PORT);
+});
