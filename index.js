@@ -7,30 +7,31 @@ app.use(express.json());
 
 app.post("/crop", async (req, res) => {
   try {
-    const { image_url, bbox, zoom_factor = 2, output_size = [1080, 1920] } = req.body;
+    const { imageUrl, bbox, output_size = [1080, 1920], zoom_factor = 2 } = req.body;
 
-    const response = await axios.get(image_url, { responseType: "arraybuffer" });
-    const image = sharp(response.data);
-    const metadata = await image.metadata();
+    if (!imageUrl || !bbox) {
+      return res.status(400).json({ error: "Missing imageUrl or bbox" });
+    }
 
     const [x1, y1, x2, y2] = bbox;
-    const centerX = (x1 + x2) / 2;
-    const centerY = (y1 + y2) / 2;
-    const width = (x2 - x1) * zoom_factor;
-    const height = (y2 - y1) * zoom_factor;
+    const cropWidth = x2 - x1;
+    const cropHeight = y2 - y1;
 
-    const left = Math.max(0, Math.round(centerX - width / 2));
-    const top = Math.max(0, Math.round(centerY - height / 2));
+    const centerX = x1 + cropWidth / 2;
+    const centerY = y1 + cropHeight / 2;
 
-    const cropped = await image
-      .extract({
-        left,
-        top,
-        width: Math.min(width, metadata.width - left),
-        height: Math.min(height, metadata.height - top)
-      })
+    const newWidth = cropWidth * zoom_factor;
+    const newHeight = cropHeight * zoom_factor;
+
+    const newX = Math.max(0, Math.floor(centerX - newWidth / 2));
+    const newY = Math.max(0, Math.floor(centerY - newHeight / 2));
+
+    const response = await axios.get(imageUrl, { responseType: "arraybuffer" });
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    const cropped = await sharp(imageBuffer)
+      .extract({ left: newX, top: newY, width: Math.floor(newWidth), height: Math.floor(newHeight) })
       .resize(output_size[0], output_size[1])
-      .jpeg()
       .toBuffer();
 
     res.set("Content-Type", "image/jpeg");
