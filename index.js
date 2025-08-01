@@ -6,8 +6,11 @@ const app = express();
 app.use(express.json());
 
 app.post("/crop", async (req, res) => {
+  
   try {
-    const { imageUrl, bbox, output_size = [1080, 1920], zoom_factor = 2 } = req.body;
+    const data = req.body
+    console.log(JSON.stingify(data))
+    const { imageUrl, bbox, output_size = [1080, 1920], zoom_factor = 2 } = data;
 
     // 🧠 תוקעים קלט: bbox יכול להיות מחרוזת, אובייקט, או מערך
     let box = bbox;
