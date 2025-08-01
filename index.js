@@ -9,7 +9,7 @@ app.post("/crop", async (req, res) => {
   
   try {
     const data = req.body
-    console.log(JSON.stingify(data))
+    console.log(JSON.stringify(data))
     const { imageUrl, bbox, output_size = [1080, 1920], zoom_factor = 2 } = data;
 
     // 🧠 תוקעים קלט: bbox יכול להיות מחרוזת, אובייקט, או מערך
