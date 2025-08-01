@@ -1,14 +1,14 @@
 {
   "name": "face-crop-server",
   "version": "1.0.0",
-  "main": "index.js",
   "type": "module",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "axios": "^1.6.8",
+    "axios": "^1.6.7",
     "express": "^4.19.2",
-    "sharp": "^0.33.4"
+    "sharp": "^0.33.3"
   }
 }
